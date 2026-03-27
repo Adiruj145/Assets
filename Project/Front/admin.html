@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Executive Dashboard - KC Grande</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .stat-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: transform 0.2s; height: 100%; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-title { color: #888; font-size: 0.9rem; font-weight: 500; margin-bottom: 5px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #333; }
+        .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body style="background-color: #f4f6f9;">
+
+<div id="navbar-placeholder"></div>
+
+<div class="container py-4">
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-file-earmark-text"></i></div>
+                <div class="stat-title">เอกสารทั้งหมด</div>
+                <div class="stat-value" id="totalDocs">0</div>
+                <small class="text-success">ใบงานในระบบ</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="bi bi-trophy"></i></div>
+                <div class="stat-title">แผนกที่ใช้งานสูงสุด</div>
+                <div class="stat-value" id="topDept" style="font-size: 1.5rem;">-</div>
+                <small class="text-muted" id="topDeptCount">0 รายการ</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="icon-box bg-info bg-opacity-10 text-info"><i class="bi bi-people"></i></div>
+                <div class="stat-title">ผู้ใช้งานในระบบ</div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <small class="text-muted">Account</small>
+            </div>
+        </div>
+    </div>
+
+
+        <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100 p-3">
+                <h6 class="fw-bold mb-3 text-primary">📊 สัดส่วนการใช้งานตามแผนก</h6>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="deptChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100 p-3">
+                <h6 class="fw-bold mb-3 text-success">📈 แนวโน้มการสร้างเอกสาร (รายวัน)</h6>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-success active" onclick="updateChartRange(7, this)">7 วัน</button>
+                    <button type="button" class="btn btn-outline-success" onclick="updateChartRange(15, this)">15 วัน</button>
+                    <button type="button" class="btn btn-outline-success" onclick="updateChartRange(30, this)">30 วัน</button>
+                </div>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 p-4 h-100" style="background: #fff; border-radius: 16px;">
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-clock-history"></i> ประวัติรายการล่าสุด</h6>
+                <div class="d-flex justify-content-between mb-3">
+                    <input type="text" id="searchInput" class="form-control form-control-sm w-50" placeholder="🔍 ค้นหา..." onkeyup="filterHistory()">
+                    <button onclick="exportToCSV()" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Export CSV</button>
+                </div>
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>วัน/เวลา</th>
+                                <th>ประเภท</th>
+                                <th>รายการ (Log)</th>
+                                <th>ผู้ทำรายการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allHistoryTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 p-4 h-100" style="background: #fff; border-radius: 16px;">
+                <h6 class="fw-bold mb-3 text-success"><i class="bi bi-people"></i> จัดการผู้ใช้</h6>
+                
+                <div class="bg-light p-3 rounded mb-4 border">
+                    <h6 class="fw-bold text-primary mb-3" style="font-size: 0.85rem;">+ เพิ่มผู้ใช้งานใหม่</h6>
+                    <div class="mb-2">
+                        <input type="text" id="newUser" class="form-control form-control-sm" placeholder="Username">
+                    </div>
+                    <div class="mb-2">
+                        <input type="text" id="newPass" class="form-control form-control-sm" placeholder="Password">
+                    </div>
+                    <div class="mb-3">
+                        <select id="newDept" class="form-select form-select-sm">
+                            <option value="IT">IT</option>
+                            <option value="HK">HK</option>
+                            <option value="FO">FO</option>
+                            <option value="FB">F&B</option>
+                            <option value="ENG">Engineer</option>
+                            <option value="AC">Accounting</option>
+                        </select>
+                    </div>
+                    <button onclick="addUser()" class="btn btn-primary btn-sm w-100">เพิ่ม User ใหม่</button>
+                </div>
+
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Username</th>
+                                <th>แผนก</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">✏️ แก้ไขข้อมูล / รีเซ็ตรหัสผ่าน</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_id">
+                <div class="mb-3">
+                    <label class="form-label text-muted">Username</label>
+                    <input type="text" class="form-control bg-light" id="edit_username" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">แผนก (Department)</label>
+                    <select id="edit_dept" class="form-select">
+                        <option value="IT">IT</option>
+                        <option value="HK">HK</option>
+                        <option value="FO">FO</option>
+                        <option value="FB">F&B</option>
+                        <option value="ENG">Engineer</option>
+                        <option value="AC">Accounting</option>
+                    </select>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-danger">🔑 ตั้งรหัสผ่านใหม่ (Reset Password)</label>
+                    <input type="text" class="form-control border-danger" id="edit_password" placeholder="ว่างไว้ = ไม่เปลี่ยนรหัส">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-primary" onclick="saveEditUser()">💾 บันทึก</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="viewDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-file-earmark-text me-2"></i>รายละเอียดเอกสาร</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="documentDetailContent">
+                    </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">ปิด</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/navbar.js"></script>
+<script src="../js/admin.js"></script>
+<script src="../js/loading.js"></script>
+
+</body>
+</html>

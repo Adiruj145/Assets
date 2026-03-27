@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>สร้างเอกสาร - KC Asset System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .form-section { display: none; }
+        .form-section.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .table-input td { padding: 5px; vertical-align: middle; }
+        .table-input input { border: 1px solid #ddd; font-size: 0.9rem; }
+    </style>
+    <link rel="stylesheet" href="../manifest.json">
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container py-4" style="max-width: 900px;">
+    <div class="main-card">
+        <h4 class="text-center fw-bold mb-4">📄 ระบบสร้างเอกสารออนไลน์</h4>
+
+        <div class="bg-light p-3 rounded mb-4 border shadow-sm">
+            <label class="fw-bold text-primary mb-2">เลือกแบบฟอร์ม:</label>
+            <select id="docTypeSelect" class="form-select form-select-lg" onchange="changeForm()">
+                <option value="" selected disabled>-- กรุณาเลือก --</option>
+                <option value="form1">1. ใบตัดสปอยทรัพย์สิน (Asset Write-off)</option>
+                <option value="form2">2. ใบแจ้งซ่อมช่าง (Internal Repair)</option>
+                <option value="form3">3. ใบเคลื่อนย้ายทรัพย์สิน (Transfer)</option>
+                <option value="form4">4. ใบส่งซ่อมร้านค้า (Outside Repair)</option>
+                <option value="form5">5. ใบแจ้งของแตกหัก (Spoilage)</option>
+            </select>
+        </div>
+        <!-- 1 -->
+        <div id="form-form1" class="form-section">
+            <h5 class="text-secondary border-bottom pb-2 mb-3">📝 1. ใบตัดสปอยทรัพย์สิน</h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6"><label>แผนก</label><input type="text" id="f1_dept" class="form-control"></div>
+                <div class="col-md-6"><label>วันที่เขียน</label><input type="date" id="f1_date" class="form-control"></div>
+            </div>
+            
+            <label class="fw-bold mb-2">รายการทรัพย์สินที่เสียหาย</label>
+            <table class="table table-bordered table-input" id="tbl_f1_damaged_broken">
+                <thead class="table-light">
+                    <tr><th style="width: 5%;">ลำดับ</th><th width="40%">รายการ</th><th>Serial No.</th><th>Code Asset</th><th style="width: 10%;">ห้องที่</th><th width="5%">ลบ</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary mb-4" onclick="addRow('tbl_f1_damaged_broken')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button>
+            <br>
+            <label class="fw-bold mb-2">รายการทรัพย์สินที่เปลี่ยนแทน</label>
+            <table class="table table-bordered table-input" id="tbl_f1_damaged_expired">
+                <thead class="table-light">
+                    <tr><th style="width: 5%;">ลำดับ</th><th width="40%">รายการ</th><th>Serial No.</th><th>Code Asset</th><th style="width: 10%;">ห้องที่</th><th width="5%">ลบ</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary mb-4" onclick="addRow('tbl_f1_damaged_expired')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button>
+
+            <div class="mb-3">
+                <label class="fw-bold">เหตุผล:</label><br>
+                <div class="bg-white p-3 border rounded mb-3">
+                    <input type="checkbox" id="f1_chk_broken"> ชำรุด/แตกหัก &nbsp;
+                    <input type="checkbox" id="f1_chk_expired"> เสื่อมสภาพ &nbsp;
+                    <input type="checkbox" id="f1_chk_cost"> ซ่อมไม่คุ้ม &nbsp;
+                    <input type="checkbox" id="f1_chk_cancel"> ยกเลิกการใช้
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">สรุปผลการตรวจสอบ:</label><br>
+                <div class="bg-white p-3 border rounded mb-3">
+                    <input type="checkbox" id="f1_chk_assets"> เบิกจากสโตร์Assets &nbsp;
+                    <input type="checkbox" id="f1_chk_dept"> เบิกจากของสแปร์แผนกตนเอง &nbsp;
+                    <input type="checkbox" id="f1_chk_buy"> ซื้อทดแทน
+                </div>
+            </div>
+        </div>
+        <!-- 2 -->
+        <div id="form-form2" class="form-section">
+            <h5 class="text-secondary border-bottom pb-2 mb-3">📝 2. ใบแจ้งซ่อมช่าง(ภายใน)</h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><label>ผู้แจ้ง</label><input type="text" id="f2_user" class="form-control"></div>
+                <div class="col-md-4"><label>แผนก</label><input type="text" id="f2_dept" class="form-control"></div>
+                <div class="col-md-4"><label>สถานที่</label><input type="text" id="f2_location" class="form-control"></div>
+                <div class="col-md-4"><label>วันที่เขียน</label><input type="text" id="f2_date" class="form-control"></div>
+            </div>
+            <div class="mb-3">
+                <label>รายละเอียด :</label>
+                    <div class="mb-3">
+                        <label class="fw-bold">รายละเอียด / Description :</label>
+                        <textarea id="f2_desc" class="form-control" rows="4" 
+                                placeholder="กรุณาระบุอาการเสียหรือสิ่งที่ต้องการให้ช่างดำเนินการ..."></textarea>
+                    </div>
+                <div class="text-end text-muted small">เหลือ <span id="cnt_f2_desc">200</span> ตัวอักษร</div>
+            </div>
+        </div>
+        <!-- 3 -->
+        <div id="form-form3" class="form-section">
+            <h5 class="text-secondary border-bottom pb-2 mb-3">📝 3. ใบเคลื่อนย้ายทรัพย์สิน</h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6"><label>วันที่เขียน</label><input type="date" id="f3_date" class="form-control"></div>
+                <div class="col-md-6"><label>แผนก</label><input type="text" id="f3_dept" class="form-control"></div>
+            </div>
+            
+            <label class="fw-bold mb-2">รายการย้าย (ตัวเก่า)</label>
+            <table class="table table-bordered table-input" id="tbl_f3_items_old">
+                <thead class="table-light">
+                    <tr><th style="width: 5%;">ลำดับ</th><th>รายการ</th><th>Serial_Number</th><th>Assets_Code</th><th style="width: 10%;">From</th><th style="width: 10%;">To</th><th width="5%">ลบ</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary mb-3" onclick="addRow('tbl_f3_items_old')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button><br>
+
+            <label class="fw-bold mb-2">รายการย้าย (ตัวใหม่)</label>
+            <table class="table table-bordered table-input" id="tbl_f3_items_new">
+                <thead class="table-light">
+                    <tr><th style="width: 5%;">ลำดับ</th><th>รายการ</th><th>Serial_Number</th><th>Assets_Code</th><th style="width: 10%;">From</th><th style="width: 10%;">To</th><th width="5%">ลบ</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary mb-3" onclick="addRow('tbl_f3_items_new')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button><br>
+
+            <label class="fw-bold">วัตถุประสงค์:</label><br>
+            <div class="bg-white p-3 border rounded mb-3">
+                <input class="form-check-input" type="checkbox" id="f3_chk_change"> เปลี่ยนสถานที่ &nbsp;
+                <input class="form-check-input" type="checkbox" id="f3_chk_transfer"> โอนระหว่างแผนก &nbsp;
+                <input class="form-check-input" type="checkbox" id="f3_chk_maid"> เบิกของจากแม่บ้าน &nbsp;
+                <input class="form-check-input" type="checkbox" id="f3_chk_store"> เบิกของจากสโตร์ &nbsp;<br>
+                
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                    <input class="form-check-input" type="checkbox" id="f3_chk_borrow"> ขอยืม 
+                    <label class="me-1">โดย:</label>
+                    <input type="text" id="f3_borrow_by" class="form-control form-control-sm me-2" style="width: 150px;" placeholder="ชื่อผู้ยืม" maxlength="30" onkeyup="countChar(this, 'cnt_borrow')">
+                    <small class="text-muted">(เหลือ <span id="cnt_borrow">30</span>)</small>
+                        
+                    <label class="me-1 ms-2">จำนวน:</label>
+                    <input type="number" id="f3_borrow_days" class="form-control form-control-sm me-1" style="width: 60px; text-align: center;">
+                    <label class="me-2">วัน</label>
+                        
+                    <label class="me-1">คืนวันที่:</label>
+                    <input type="date" id="f3_borrow_date" class="form-control form-control-sm" style="width: 130px;">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="fw-bold">เหตุผล:</label><br>
+                <div class="bg-white p-3 border rounded mb-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="f3_reason_opt" id="f3_chk_reason_repair" value="broken">
+                        <label class="form-check-label" for="f3_chk_reason_repair">สินทรัพย์ชำรุด ส่งซ่อมให้ช่างตรวจสอบ</label>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="form-check me-2">
+                            <input class="form-check-input" type="radio" name="f3_reason_opt" id="f3_chk_reason_no_item" value="no_item">
+                            <label class="form-check-label text-nowrap" for="f3_chk_reason_no_item">ไม่มีของใช้งาน เหตุผล</label>
+                        </div>
+                        <input type="text" id="f3_txt_reason_no_item_desc" class="form-control form-control-sm border-0 border-bottom" placeholder="ระบุเหตุผล...">
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="form-check me-2">
+                            <input class="form-check-input" type="radio" name="f3_reason_opt" id="f3_chk_reason_other" value="other">
+                            <label class="form-check-label text-nowrap" for="f3_chk_reason_other">อื่นๆ</label>
+                        </div>
+                        <input type="text" id="f3_txt_reason_other_desc" class="form-control form-control-sm border-0 border-bottom" placeholder="ระบุอื่นๆ...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 4 -->
+        <div class="mb-3"> <div id="form-form4" class="form-section">
+            <h5 class="text-secondary border-bottom pb-2 mb-3">📝 4. ใบส่งซ่อมร้านค้า(ภายนอก)</h5>
+            <div class="col-md-6"><label>วันที่เขียน</label><input type="date" id="f4_date" class="form-control"></div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><label>ผู้แจ้ง</label><input type="text" id="f4_user" class="form-control"></div>
+                <div class="col-md-4"><label>แผนก</label><input type="text" id="f4_dept" class="form-control"></div>
+                <div class="col-md-4"><label>ร้านค้า</label><input type="text" id="f4_location" class="form-control"></div>
+            </div>
+            <label class="fw-bold mb-2">รายการส่งซ่อม</label>
+            <table class="table table-bordered table-input" id="tbl_f4_items">
+                <thead class="table-light">
+                    <tr><th style="width: 5%;">ลำดับ</th><th>รายการ</th><th width="40%">อาการเสีย</th><th width="5%">ลบ</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary mb-3" onclick="addRow('tbl_f4_items')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button>
+            <div class="mb-3">
+                <label>เหตุผล :</label>
+                    <div class="bg-white p-3 border rounded mb-3">
+                        <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="f_reason_opt" id="f4_no" value="broken">
+                                <label class="form-check-label" for="f4_no">ช่างไม่สามารถดำเนินการซ่อมได้</label>
+                            </div>
+
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="form-check me-2">
+                                    <input class="form-check-input" type="radio" name="f4_reason_opt" id="f4_none" value="no_item">
+                                    <label class="form-check-label text-nowrap" for="f4_none">ช่างไม่มีเครื่องมือที่เหมาะสมในการซ่อม</label>
+                            </div>
+                            <br>
+                            <div class="d-flex align-items-center">
+                                <div class="form-check me-2">
+                                    <input class="form-check-input" type="radio" name="f3_reason_opt" id="f4_other" value="other">
+                                    <label class="form-check-label text-nowrap" for="f4_other">อื่นๆ</label>
+                                </div>
+                                <input type="text" id="txt_reason_other_desc" class="form-control form-control-sm border-0 border-bottom " placeholder="ระบุอื่นๆ...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 5 -->
+            <div id="form-form5" class="form-section">
+        <h5 class="text-primary border-bottom pb-2 mb-3">📝 5. ใบแจ้งรายการของแตกหัก</h5>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><label>แผนก</label><input type="text" id="f5_dept" class="form-control"></div>
+            <div class="col-md-4"><label>OUTLET</label><input type="text" id="f5_outlet" class="form-control"></div>
+            <div class="col-md-4"><label>ระหว่างวันที่</label><input type="text" id="f5_date" class="form-control" placeholder="เช่น 01/03/2026 - 15/03/2026"></div>
+        </div>
+        
+        <table class="table table-bordered table-input" id="tbl_f5_items">
+            <thead class="table-light">
+                <tr><th width="25%">วัน/เดือน/ปี</th><th>รายการ</th><th width="20%">จำนวนชิ้น</th><th width="5%">ลบ</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="btn btn-sm btn-outline-primary mb-3" onclick="addRow('tbl_f5_items')"><i class="bi bi-plus-circle"></i> เพิ่มรายการ</button>
+    </div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">📄 ตัวอย่างเอกสารก่อนบันทึก</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="pdfPreviewFrame" style="width:100%; height:75vh; border:none;"></iframe>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ย้อนกลับไปแก้ไข</button>
+                <button type="button" class="btn btn-success px-4" onclick="finalDownload()">✅ ยืนยันข้อมูลและดาวน์โหลด</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="actionArea" style="display:none;" class="mt-4 border-top pt-4">
+    <div class="bg-white p-3 border rounded mb-3 shadow-sm">
+        <label class="fw-bold mb-2"><i class="bi bi-image"></i> แนบรูปภาพประกอบ (ถ้ามี):</label>
+        <input type="file" id="attach_img" class="form-control" accept="image/*" multiple>
+    </div>
+    <button onclick="startPreview()" class="btn btn-generate w-100 py-3" id="btnGen">🔍 ดูตัวอย่างและตรวจสอบความถูกต้อง</button>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/navbar.js"></script>
+<script src="../js/script.js"></script>
+
+<script>
+    const u = checkAuth();
+    if(document.getElementById('f1_dept')) document.getElementById('f1_dept').value = u.department;
+    if(document.getElementById('f2_dept')) document.getElementById('f2_dept').value = u.department;
+
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+        
+        let colCount = 0;
+        if(tableId === 'tbl_f1_damaged_broken') colCount = 5;
+        else if(tableId === 'tbl_f1_damaged_expired') colCount = 5;
+        else if(tableId === 'tbl_f2_parts') colCount = 5;
+        else if(tableId === 'tbl_f3_items_old') colCount = 6;
+        else if(tableId === 'tbl_f3_items_new') colCount = 6;
+        else if(tableId === 'tbl_f4_items') colCount = 3;
+        else if(tableId === 'tbl_f5_items') colCount = 3;
+
+        for (let i = 0; i < colCount; i++) {
+            const cell = newRow.insertCell(i);
+            cell.innerHTML = `<input type="text" class="form-control">`;
+        }
+        const delCell = newRow.insertCell(colCount);
+        delCell.className = "text-center";
+        delCell.innerHTML = `<button class="btn btn-sm btn-light text-danger" onclick="removeRow(this)"><i class="bi bi-trash"></i></button>`;
+    }
+
+    function removeRow(btn) {
+        const row = btn.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    // ✅ ฟังก์ชันนับตัวอักษร
+    function countChar(input, showId) {
+        var max = input.getAttribute("maxlength");
+        var len = input.value.length;
+        var remain = max - len;
+        document.getElementById(showId).innerHTML = remain;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        if (type) {
+            const select = document.getElementById('docTypeSelect');
+            if(select) {
+                select.value = type;
+                changeForm();
+            }
+        }
+    });
+
+    function changeForm() {
+        document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+        const type = document.getElementById('docTypeSelect').value;
+        if(!type) return;
+        
+        const target = document.getElementById(`form-${type}`);
+        target.classList.add('active');
+        document.getElementById('actionArea').style.display = 'block';
+
+        const table = target.querySelector('table');
+        if(table && table.getElementsByTagName('tbody')[0].rows.length === 0) {
+            addRow(table.id);
+        }
+    }
+</script>
+<script src="../js/loading.js"></script>
+</body>
+</html>

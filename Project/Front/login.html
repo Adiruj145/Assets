@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - KC Grande Asset</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../manifest.json">
+</head>
+<body class="d-flex align-items-center justify-content-center">
+    <div id="navbar-placeholder"></div>
+    <div class="main-card text-center" style="width: 400px; padding: 50px;">
+        <h3 class="mb-4 fw-bold">🔐 เข้าสู่ระบบ</h3>
+        <p class="text-muted">Asset Write-off System</p>
+        <input type="text" class="form-control mb-3" id="username" placeholder="Username">
+        <input type="password" class="form-control mb-4" id="password" placeholder="Password">
+        <button onclick="handleLogin()" class="btn btn-generate w-100 mb-3">Login</button>
+        <div id="errorMsg" class="text-danger small" style="display:none;">Username หรือ Password ผิด</div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // ถ้าล็อกอินแล้ว ให้ไปหน้าสร้างฟอร์มเลย
+        if(localStorage.getItem('kc_current_user')) {
+            window.location.href = 'create_form.html';
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const errorEl = document.getElementById('errorMsg');
+
+            // เรียกใช้ login() จาก auth.js เท่านั้น (ห้ามมี function login ซ้ำในหน้านี้)
+            if (login(u, p)) {
+                const user = getCurrentUser();
+                // ถ้าเป็น admin ให้ไปหน้าจัดการ ถ้าเป็น user ทั่วไปให้ไปหน้าสร้างฟอร์ม
+                window.location.href = (user.role === 'admin') ? 'admin.html' : 'create_form.html';
+            } else {
+                errorEl.style.display = 'block';
+            }
+        }
+</script>
+    <script src="../js/loading.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

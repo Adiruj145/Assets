@@ -1,0 +1,96 @@
+/* style.css */
+:root { 
+    --primary-color: #0d6efd; 
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+    --glass-bg: rgba(255, 255, 255, 0.95);
+}
+
+body { 
+    font-family: 'Prompt', sans-serif; 
+    background: var(--bg-gradient); 
+    min-height: 100vh; 
+    padding: 0; 
+    color: #333;
+}
+
+.main-card { 
+    background: var(--glass-bg); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px; 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
+    padding: 20px; 
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.form-control, .form-select { 
+    border-radius: 12px; padding: 10px; 
+}
+.form-control:focus { 
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); 
+}
+
+.btn-generate { 
+    background: linear-gradient(45deg, #2193b0, #6dd5ed); 
+    border: none; border-radius: 50px; padding: 10px 30px; 
+    color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(33, 147, 176, 0.2); 
+    transition: all 0.3s;
+}
+.btn-generate:hover { transform: translateY(-2px); color: #fff; }
+
+/* Table Styling */
+.table-custom th { background-color: #f8f9fa; font-weight: 600; color: #555; }
+.stat-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 100%; }
+
+.view-section { 
+        display: none; /* ซ่อนทุกหน้าไว้ก่อน */
+        animation: fadeIn 0.3s; 
+    }
+    .view-section.active { 
+        display: block; /* โชว์เฉพาะหน้าที่มี class active */
+    }
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateX(20px); } 
+        to { opacity: 1; transform: translateX(0); } 
+    }
+    
+    /* ตกแต่งปุ่มเมนู */
+    .settings-menu-item { cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; }
+    .settings-menu-item:hover { background-color: #f8f9fa; border-left: 4px solid #0d6efd; padding-left: 25px !important; }
+
+    /* style.css */
+
+/* 1. ตั้งค่า Navbar ให้ลอยติดบนสุด และอยู่เหนือทุกสิ่ง */
+.navbar {
+    position: fixed !important;  /* สั่งให้ติดอยู่กับที่ */
+    top: 0;
+    left: 0;
+    width: 100%;                 /* กว้างเต็มจอ */
+    
+    /* 🔥 สำคัญ: Loader เราตั้งไว้ 99999 ดังนั้น Navbar ต้องมากกว่า */
+    z-index: 100000 !important;  
+}
+
+/* 2. ดันเนื้อหาลงมา (สำคัญมาก!) */
+/* เพราะพอ Navbar ลอยแล้ว เนื้อหาข้างล่างจะมุดเข้าไปซ่อนใต้เมนู */
+body {
+    padding-top: 90px !important; /* ปรับตัวเลขนี้ตามความสูงของ Navbar คุณ */
+}
+
+/* 3. (แถม) ทำให้ Dropdown เมนูอยู่เหนือหน้าโหลดด้วย */
+.dropdown-menu {
+    z-index: 100001 !important;
+}
+
+/* style.css (เพิ่มต่อท้าย) */
+
+/* --- Dark Mode Styles --- */
+.app-version-footer {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    font-size: 10px;
+    color: #6c757d;
+    z-index: 1000;
+    pointer-events: none; /* ไม่ให้ขวางการคลิกปุ่มอื่น */
+}
